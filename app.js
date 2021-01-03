@@ -4,6 +4,7 @@ const colors = document.getElementsByClassName("jsColor");
 const range = document.getElementById("jsRange");
 const mode = document.getElementById("jsMode");
 const saveBtn = document.getElementById("jsSave");
+const undo = document.getElementById("jsUndo");
 
 const INITIAL_COLOR = "#2c2c2c";
 
@@ -19,23 +20,38 @@ ctx.lineWidth = 2.5;
 let painting = false;
 let filling = false;
 
+var undoList = [];
+
 function stopPainting(){
     painting = false;
 }
 
 function startPainting(){
     painting = true;
+    undoList.length = 0;
+    console.log(undoList)
 }
 
 function onMouseMove(event){
     const x = event.offsetX;
     const y = event.offsetY;
+    lastX = x;
+    lastY = y;
     if(!painting){
         ctx.beginPath();
         ctx.moveTo(x,y);
     } else {
         ctx.lineTo(x,y);
         ctx.stroke();
+        lastX = x;
+        lastY = y;
+        undoList.push({
+            x: lastX,
+            y: lastY,
+            size: ctx.lineWidth,
+            color: ctx.strokeStyle,
+            mode: "draw"
+        })
     }
 }
 
@@ -72,7 +88,6 @@ function handelModeClick(){
     } else {
         filling = true;
         mode.innerText = "Paint"
-        
     }
 }
 
@@ -92,6 +107,10 @@ function handleSaveClick(){
     link.href = image;
     link.download = "PaintJS";
     link.click();
+}
+
+function undoLast(){
+
 }
 
 if(canvas){
@@ -116,4 +135,8 @@ if(mode){
 
 if(saveBtn){
     saveBtn.addEventListener("click", handleSaveClick);
+}
+
+if(undo){
+    undo.addEventListener("click",undoLast);
 }
