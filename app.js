@@ -20,23 +20,24 @@ ctx.lineWidth = 2.5;
 let painting = false;
 let filling = false;
 
-var undoList = [];
+const undoList = [];
+const totalUndoList = [];
 
 function stopPainting(){
     painting = false;
+    const history = undoList.slice();
+    totalUndoList.push(history);
+    console.log(totalUndoList);
 }
 
 function startPainting(){
-    painting = true;
     undoList.length = 0;
-    console.log(undoList)
+    painting = true;
 }
 
 function onMouseMove(event){
     const x = event.offsetX;
     const y = event.offsetY;
-    lastX = x;
-    lastY = y;
     if(!painting){
         ctx.beginPath();
         ctx.moveTo(x,y);
@@ -110,7 +111,8 @@ function handleSaveClick(){
 }
 
 function undoLast(){
-
+    totalUndoList.pop();
+    console.log(totalUndoList);
 }
 
 if(canvas){
