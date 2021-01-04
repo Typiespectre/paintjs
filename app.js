@@ -50,14 +50,17 @@ function onMouseMove(event){
             x: lastX,
             y: lastY,
             size: ctx.lineWidth,
-            color: ctx.strokeStyle,
-            mode: "draw"
-        })
+            color: ctx.strokeStyle
+        });
+
     }
 }
 
 function onMouseLeave(event){
     ctx.closePath();
+    document.body.addEventListener('mouseup',function(event){
+        painting = false;
+    });
 }
 
 function onMouseEnter(event){
@@ -68,8 +71,8 @@ function onMouseEnter(event){
     } else {
         ctx.beginPath();
         ctx.moveTo(x,y);
+        }
     }
-}
 
 function handleColorClick(event){
     const color = event.target.style.backgroundColor;
@@ -113,6 +116,17 @@ function handleSaveClick(){
 function undoLast(){
     totalUndoList.pop();
     console.log(totalUndoList);
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    totalUndoList.forEach(undo => {
+        ctx.beginPath();
+        ctx.moveTo(undo[0].x,undo[0].y);
+        for(let i = 1; i<undo.length; i++){
+            ctx.lineTo(undo[i].x,undo[i].y);
+            ctx.strokeStyle = undo[i].color;
+            ctx.lineWidth = undo[i].size;
+        }
+        ctx.stroke();
+    })
 }
 
 if(canvas){
