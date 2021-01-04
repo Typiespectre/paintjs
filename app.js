@@ -46,34 +46,25 @@ function onMouseMove(event){
         ctx.stroke();
         lastX = x;
         lastY = y;
-        undoList.push({
-            x: lastX,
-            y: lastY,
-            size: ctx.lineWidth,
-            color: ctx.strokeStyle
-        });
-
+        if(filling === true){
+            undoList.push({
+                x: 0,
+                y: 0,
+                size: 0,
+                color: ctx.fillStyle,
+                fill: true
+            });
+        } else {
+            undoList.push({
+                x: lastX,
+                y: lastY,
+                size: ctx.lineWidth,
+                color: ctx.strokeStyle,
+                fill: false
+            });  
+        }    
     }
 }
-
-function onMouseLeave(event){
-    ctx.closePath();
-    document.body.addEventListener('mouseup',function(event){
-        painting = false;
-    });
-}
-
-function onMouseEnter(event){
-    const x = event.offsetX;
-    const y = event.offsetY;
-    if(!painting){
-        painting = false;
-    } else {
-        ctx.beginPath();
-        ctx.moveTo(x,y);
-        }
-    }
-
 function handleColorClick(event){
     const color = event.target.style.backgroundColor;
     ctx.strokeStyle = color;
@@ -97,8 +88,8 @@ function handelModeClick(){
 
 function handleCanvasClick(){
    if(filling){
-    ctx.fillRect(0,0,canvas.width, canvas.height);
-   } 
+        ctx.fillRect(0,0,canvas.width, canvas.height);
+    } 
 }
 
 function handleContextMenu(event){
@@ -121,9 +112,16 @@ function undoLast(){
         ctx.beginPath();
         ctx.moveTo(undo[0].x,undo[0].y);
         for(let i = 1; i<undo.length; i++){
-            ctx.lineTo(undo[i].x,undo[i].y);
-            ctx.strokeStyle = undo[i].color;
-            ctx.lineWidth = undo[i].size;
+            if(!undo[i].fill){
+                ctx.lineTo(undo[i].x,undo[i].y);
+                ctx.strokeStyle = undo[i].color;
+                ctx.lineWidth = undo[i].size;
+            } else {
+                ctx.fillStyle = undo[i].color;
+                ctx.strokeStyle = undo[i].color;
+                ctx.lineWidth = undo[i].size;
+                ctx.fillRect(0,0,canvas.width, canvas.height);
+            }
         }
         ctx.stroke();
     })
@@ -133,8 +131,9 @@ if(canvas){
     canvas.addEventListener("mousemove", onMouseMove);
     canvas.addEventListener("mousedown", startPainting);
     canvas.addEventListener("mouseup", stopPainting);
-    canvas.addEventListener("mouseleave", onMouseLeave);
-    canvas.addEventListener("mouseenter", onMouseEnter);
+    canvas.addEventListener("mouseleave", function(event) {
+        painting = false;
+    });
     canvas.addEventListener("click", handleCanvasClick);
     canvas.addEventListener("contextmenu", handleContextMenu);
 }
